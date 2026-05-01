@@ -137,21 +137,22 @@ disease_solutions = {
 }
 
 class_names = [
-    "Pepper__bell___Bacterial_spot",
-    "Pepper__bell___healthy",
-    "Potato___Early_blight",
-    "Potato___Late_blight",
-    "Potato___healthy",
-    "Tomato_Bacterial_spot",
-    "Tomato_Early_blight",
-    "Tomato_Late_blight",
-    "Tomato_Leaf_Mold",
-    "Tomato_Septoria_leaf_spot",
-    "Tomato_Spider_mites_Two_spotted_spider_mite",
-    "Tomato__Target_Spot",
-    "Tomato__Tomato_YellowLeaf__Curl_Virus",
-    "Tomato__Tomato_mosaic_virus",
-    "Tomato_healthy"
+    "Pepper__bell___Bacterial_spot",   # 0
+    "Pepper__bell___healthy",           # 1
+    "PlantVillage",                     # 2
+    "Potato___Early_blight",            # 3
+    "Potato___Late_blight",             # 4
+    "Potato___healthy",                 # 5
+    "Tomato_Bacterial_spot",            # 6
+    "Tomato_Early_blight",              # 7
+    "Tomato_Late_blight",               # 8
+    "Tomato_Leaf_Mold",                 # 9
+    "Tomato_Septoria_leaf_spot",        # 10
+    "Tomato_Spider_mites_Two_spotted_spider_mite", # 11
+    "Tomato__Target_Spot",              # 12
+    "Tomato__Tomato_YellowLeaf__Curl_Virus", # 13
+    "Tomato__Tomato_mosaic_virus",      # 14
+    "Tomato_healthy"                    # 15
 ]
 
 def predict_disease(img_path):
@@ -164,6 +165,18 @@ def predict_disease(img_path):
         prediction = model.predict(x)
         predicted_class = class_names[np.argmax(prediction)]
         confidence = float(np.max(prediction))
+
+        if confidence < 0.5 or predicted_class == "PlantVillage":
+            return {
+                "disease": "Unknown",
+                "confidence": round(confidence * 100, 2),
+                "description": "The model could not confidently identify this image. Please upload a clear photo of a plant leaf.",
+                "solution": "Make sure the image shows only the leaf clearly with good lighting.",
+                "farmer_tip": "Take a close-up photo of the affected leaf in daylight. Avoid blurry or dark images.",
+                "homemade_solution": "N/A",
+                "medicine": "N/A",
+                "field_manner": "N/A"
+            }
 
         return {
             "disease": predicted_class,

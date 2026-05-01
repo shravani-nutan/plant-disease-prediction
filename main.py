@@ -9,6 +9,9 @@ import os
 from project import predict_disease
 from database import Base, engine, get_db, User
 from auth import hash_password, verify_password, create_access_token
+from gtts import gTTS
+from fastapi.responses import FileResponse
+import tempfile
 from deep_translator import GoogleTranslator
 
 Base.metadata.create_all(bind=engine)
@@ -70,6 +73,21 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 class TranslateRequest(BaseModel):
     texts: dict
     target_lang: str
+
+class SpeakRequest(BaseModel):
+    text: str
+    lang: str
+
+@app.post("/speak")
+def speak(data: SpeakRequest):
+    try:
+        tts = gTTS(text=data.text, lang=data.lang)
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        tts.save(tmp.name)
+        return FileResponse(tmp.name, media_type="audio/mpeg", filename="speech.mp3")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/translate")
 def translate(data: TranslateRequest):
